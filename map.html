@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Choose a place</title>
+	<style>
+	#map-canvas {
+        	height: 90%;
+		width: 100%;
+      	}
+      	html, body {
+        	height: 100%;
+		margin: 0;
+        	padding: 0; 
+     	}
+	</style>
+</head>
+<body bgcolor="#ECFDDF">
+	<div id="map-canvas"></div>
+	<script src="js/maps.js"></script>
+	<link href="css/style.css" rel='stylesheet' type='text/css' /> 
+	<link href="css/bootstrap.css" rel='stylesheet' type='text/css' /> 
+	<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+	<script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key="></script>
+	<script type="text/javascript">
+		var myLatlng = new google.maps.LatLng(12.949845, 80.19727);
+		var myOptions = {
+			zoom: 17,
+		  	center: myLatlng
+		}
+		var map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
+		var geocoder = new google.maps.Geocoder();
+		alert('You are requested to select locations from the map');
+		google.maps.event.addListener(map, 'click', function(event) {
+			geocoder.geocode({
+		    	'latLng': event.latLng
+			},function(results, status) {
+		    	if (status == google.maps.GeocoderStatus.OK) {
+		    		if (results[0]) {
+		        		//alert(results[0].formatted_address);
+					var latitude = results[0].geometry.location.lat();
+					var longitude = results[0].geometry.location.lng();
+					var newlatlng = new google.maps.LatLng(latitude,longitude);
+					var marker = new google.maps.Marker({
+    					position: newlatlng,
+    					map: map,
+					title : results[0].formatted_address,
+					//label: results[0].formatted_address
+			});
+		      		}
+		    	}
+		    	var send_data = results[0].formatted_address;
+			var storedNames = JSON.parse(sessionStorage.getItem("places"));
+			var result = storedNames + "@" + send_data;
+			sessionStorage.setItem("places", JSON.stringify(result));
+		    	console.log(send_data);
+				var saveData = $.ajax({
+      				type: 'POST',
+      				url: "http://www.google.com",
+      				data: send_data,
+      				dataType: "text",
+      				success: function(resultData) { alert("Check Complete") }
+				});
+				error:(function() { alert("Something went wrong"); });
+			});
+		});
+function check(){
+var storedNames = JSON.parse(sessionStorage.getItem("places"));
+document.cookie="cookie-places=" + storedNames + "";
+}
+	</script>
+<form action="estimating.php" method="post" onSubmit='check()'>
+<br/><CENTER><input type="submit" class="w3-btn w3-green w3-text-shadow" value='Estimate Selected Areas'></CENTER>
+</form>
+</div>
+</body>
+</html>
